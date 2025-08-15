@@ -32,7 +32,7 @@ fastlane add_plugin https://github.com/547/fastlane-plugin-upload_to_pgyer_via_c
 ```ruby
 lane :upload_to_pgyer do
   upload_to_pgyer_via_curl(
-    ipa_path: "path/to/your/app.ipa", # 或 apk_path
+    file_path: "path/to/your/app.ipa", # 或 apk_path
     api_key: "your_pgyer_api_key",
     
     # 可选参数
@@ -58,7 +58,7 @@ fastlane upload_to_pgyer
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
-| `ipa_path` / `apk_path` | String | ✅ | - | IPA 或 APK 文件路径 |
+| `file_path` | String | ✅ | - | IPA 或 APK 文件路径 |
 | `api_key` | String | ✅ | - | 蒲公英 API Key（在后台获取） |
 | `build_update_description` | String | ❌ | - | 更新日志，支持换行 `\n` |
 | `build_channel_shortcut` | String | ❌ | - | 渠道短链标识 |
@@ -75,7 +75,7 @@ fastlane upload_to_pgyer
 
 ```ruby
 upload_to_pgyer_via_curl(
-  ipa_path: "./build/app.ipa",
+  file_path: "./build/app.ipa",
   api_key: "xxxxxx",
   build_update_description: "v1.5.0 正式版发布"
 )

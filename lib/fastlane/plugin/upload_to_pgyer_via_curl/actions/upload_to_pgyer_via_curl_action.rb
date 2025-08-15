@@ -15,8 +15,8 @@ module Fastlane
     # - 可复用，适合多 lane 调用
     #
     # 注意：
-    # - 必须提供 `ipa_path` 和 `api_key`
-    # - ipa_path：(必填) 需要上传的ipa或者apk文件
+    # - 必须提供 `file_path` 和 `api_key`
+    # - file_path：(必填) 需要上传的ipa或者apk文件
     # - api_key：(必填) API Key（注意：字段名为 _api_key）（https://www.pgyer.com/doc/view/api#auth）
     # - build_install_type：(选填)应用安装方式，值为(1,2,3，默认为1 公开安装)。1：公开安装，2：密码安装，3：邀请安装
     # - 推荐将敏感信息（如 key）配置在 .env 或 CI 环境变量中
@@ -24,7 +24,7 @@ module Fastlane
             # 主要执行方法
       def self.run(params)
         # 提取参数
-        ipa_path = params[:ipa_path]
+        file_path = params[:file_path]
         api_key = params[:api_key]
         update_description = params[:update_description]
         channel = params[:channel]
@@ -38,10 +38,10 @@ module Fastlane
         timeout = params[:timeout] || 1800  # 默认超时时间为 30 分钟
 
         # 1. 检查 IPA 文件是否存在
-        unless File.exist?(ipa_path)
-          UI.user_error!("❌ 文件不存在：#{ipa_path}")
+        unless File.exist?(file_path)
+          UI.user_error!("❌ 文件不存在：#{file_path}")
         end
-        size_mb = File.size(ipa_path).to_f / 1024 / 1024
+        size_mb = File.size(file_path).to_f / 1024 / 1024
         UI.message("📦 文件大小: #{size_mb.round(2)} MB")
 
         # 2. 构建 curl 命令
@@ -50,7 +50,7 @@ module Fastlane
           "curl",                           # 使用系统 curl
           "-sS",                            # 静默模式，只显示错误
           "-w", "\\n%{http_code}",         # 在响应末尾追加 HTTP 状态码
-          "-F", "file=@#{ipa_path}",       # (必填) 需要上传的ipa或者apk文件
+          "-F", "file=@#{file_path}",       # (必填) 需要上传的ipa或者apk文件
           "-F", "_api_key=#{api_key}",     # (必填) API Key（注意：字段名为 _api_key）（https://www.pgyer.com/doc/view/api#auth）
           "-F", "buildInstallType=#{build_install_type}"  # (选填)应用安装方式，值为(1,2,3，默认为1 公开安装)。1：公开安装，2：密码安装，3：邀请安装
         ]
@@ -150,8 +150,8 @@ module Fastlane
       def self.available_options
         [
           FastlaneCore::ConfigItem.new(
-            key: :ipa_path,
-            env_name: "PGYER_IPA_PATH",
+            key: :file_path,
+            env_name: "PGYER_FILE_PATH",
             description: "(必填) IPA 或 APK 文件的本地路径",
             is_string: true,
             verify_block: proc do |value|
