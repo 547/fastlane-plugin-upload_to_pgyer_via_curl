@@ -15,7 +15,10 @@
 在你的 Fastlane 项目中运行：
 
 ```bash
-fastlane add_plugin upload_to_pgyer_via_curl
+# gitee源
+fastlane add_plugin https://gitee.com/timersevenwang/fastlane-plugin-upload_to_pgyer_via_curl/releases/download/1.0.0/fastlane-plugin-upload_to_pgyer_via_curl-1.0.0.gem
+# github源
+fastlane add_plugin https://github.com/547/fastlane-plugin-upload_to_pgyer_via_curl/releases/download/1.0.0/fastlane-plugin-upload_to_pgyer_via_curl-1.0.0.gem
 ```
 
 > ⚠️ 确保你的系统已安装 `curl`（绝大多数 macOS/Linux 系统默认自带）。
