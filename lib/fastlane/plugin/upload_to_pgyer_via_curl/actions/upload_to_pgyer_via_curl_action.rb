@@ -21,7 +21,7 @@ module Fastlane
     # - build_install_type：(选填)应用安装方式，值为(1,2,3，默认为1 公开安装)。1：公开安装，2：密码安装，3：邀请安装
     # - 推荐将敏感信息（如 key）配置在 .env 或 CI 环境变量中
     class UploadToPgyerViaCurlAction < Action
-            # 主要执行方法
+      # 主要执行方法
       def self.run(params)
         # 提取参数
         file_path = params[:file_path]
@@ -46,17 +46,16 @@ module Fastlane
 
         # 2. 构建 curl 命令
         command = [
-          "timeout", timeout.to_s,  # 设置超时时间
-          "curl",                           # 使用系统 curl
-          "-sS",                            # 静默模式，只显示错误
+          "timeout", timeout.to_s,
+          "curl",
+          "-#",                            # 显示简洁进度条（推荐）
           "-w", "\\n%{http_code}",         # 在响应末尾追加 HTTP 状态码
-          "-F", "file=@#{file_path}",       # (必填) 需要上传的ipa或者apk文件
-          "-F", "_api_key=#{api_key}",     # (必填) API Key（注意：字段名为 _api_key）（https://www.pgyer.com/doc/view/api#auth）
-          "-F", "buildInstallType=#{build_install_type}"  # (选填)应用安装方式，值为(1,2,3，默认为1 公开安装)。1：公开安装，2：密码安装，3：邀请安装
+          "-F", "file=@#{file_path}",
+          "-F", "_api_key=#{api_key}",
+          "-F", "buildInstallType=#{build_install_type}"
         ]
 
         # 添加可选参数（仅当值存在时）
-        # ✅ 正确处理多行描述：用单引号包裹，只转义单引号
         if build_update_description.to_s.strip.length > 0
           escaped_desc = escape_single_quote(build_update_description)
           command += ["-F", "buildUpdateDescription='#{escaped_desc}'"]
@@ -66,21 +65,27 @@ module Fastlane
         command += ["-F", "buildInstallStartDate=#{build_install_start_date}"] if build_install_start_date.to_s.strip.length > 0
         command += ["-F", "buildInstallEndDate=#{build_install_end_date}"] if build_install_end_date.to_s.strip.length > 0
         command += ["-F", "buildChannelShortcut=#{build_channel_shortcut}"] if build_channel_shortcut.to_s.strip.length > 0
+
         # 限制最大速率，避免被服务器限流
-        command << "--limit-rate" << "20M"  
+        command << "--limit-rate" << "200M"
+
         # 目标 URL
         command << "https://www.pgyer.com/apiv2/app/upload"
 
-        # 输出调试信息
-        UI.message("🚀 正在使用 curl 上传到蒲公英...")
-        UI.verbose("执行命令: #{command.join(' ')}")
+        # 输出调试信息（仅在 verbose 模式下）
+        UI.verbose("🔧 执行命令: #{command.join(' ')}")
 
-        # 3. 执行命令
+        # 3. 执行命令（关键：禁用输出捕获，提升性能）
+        UI.message("🚀 正在使用 curl 上传到蒲公英...")
+
         begin
-          result = Helper::UploadToPgyerViaCurlHelper.execute_command(command)
+          # ✅ 核心优化：使用 Fastlane 的 sh，禁用输出捕获
+          result = sh(command, disable_output: true)
+
+          # 解析输出：最后一行是 HTTP 状态码
           lines = result.strip.split("\n")
-          status_code = lines.pop.to_i  # 最后一行是 HTTP 状态码
-          body = lines.join("\n")       # 前面是响应体
+          status_code = lines.pop.to_i
+          body = lines.join("\n")
 
           # 4. 解析 JSON 响应
           json = JSON.parse(body)
@@ -94,7 +99,7 @@ module Fastlane
             UI.message("🔗 下载地址: #{download_url}")
             UI.message("📱 二维码: #{qr_url}")
 
-            # 返回结果，供后续 lane 使用（如发送钉钉通知）
+            # 返回结果，供后续 lane 使用
             return {
               success: true,
               download_url: download_url,
@@ -109,7 +114,6 @@ module Fastlane
             raise "蒲公英上传失败: #{error_msg}"
           end
 
-        # 捕获执行异常（如网络中断、curl 未安装等）
         rescue => e
           UI.error("上传失败: #{e.message}")
           raise e
