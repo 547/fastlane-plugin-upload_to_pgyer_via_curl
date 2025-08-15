@@ -66,9 +66,6 @@ lane :upload_to_pgyer do
     build_update_description: "本次更新内容：\n- 修复了登录闪退\n- 优化了启动速度",
     build_channel_shortcut: "test_ios_20250815",
     build_install_type: 1, # 1=公开，2=密码安装，3=扫描安装（默认1）
-    
-    # 高级选项
-    timeout: 1800,        # 总超时时间（秒）
   )
 end
 ```
@@ -90,7 +87,6 @@ fastlane upload_to_pgyer
 | `build_update_description` | String | ❌ | - | 更新日志，支持换行 `\n` |
 | `build_channel_shortcut` | String | ❌ | - | 渠道短链标识 |
 | `build_install_type` | Integer | ❌ | `1` | 安装方式：1=公开，2=密码，3=扫描 |
-| `timeout` | Integer | ❌ | `1800` | 整个上传最大耗时（秒） |
 
 > 📝 提示：`build_update_description` 中的单引号 `'` 会被自动转义，无需手动处理。
 
