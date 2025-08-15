@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'json'
 require 'fastlane/action'
-require_relative '../helper/upload_to_pgyer_via_curl_helper'
 
 module Fastlane
   module Actions
