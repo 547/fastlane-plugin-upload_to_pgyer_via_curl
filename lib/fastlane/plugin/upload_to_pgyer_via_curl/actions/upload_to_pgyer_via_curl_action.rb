@@ -65,7 +65,7 @@ module Fastlane
         command += ["-F", "buildInstallEndDate=#{build_install_end_date}"] if build_install_end_date.to_s.strip.length > 0
         command += ["-F", "buildChannelShortcut=#{build_channel_shortcut}"] if build_channel_shortcut.to_s.strip.length > 0
         # 限制最大速率，避免被服务器限流
-        command << "--limit-rate" << "20M"  
+        command << "--limit-rate" << "200M"  
         # 目标 URL
         command << "https://www.pgyer.com/apiv2/app/upload"
 
