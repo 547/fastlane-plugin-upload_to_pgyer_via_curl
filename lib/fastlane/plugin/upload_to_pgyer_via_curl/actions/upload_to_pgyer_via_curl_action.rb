@@ -34,7 +34,6 @@ module Fastlane
         build_install_start_date = params[:build_install_start_date]
         build_install_end_date = params[:build_install_end_date]
         build_channel_shortcut = params[:build_channel_shortcut] || channel
-        timeout = params[:timeout] || 1800  # 默认超时时间为 30 分钟
 
         # 1. 检查 IPA 文件是否存在
         unless File.exist?(file_path)
@@ -45,7 +44,6 @@ module Fastlane
 
         # 2. 构建 curl 命令
         command = [
-          "timeout", timeout.to_s,
           "curl",
           "-#",                            # 显示简洁进度条（推荐）
           "-w", "\\n%{http_code}",         # 在响应末尾追加 HTTP 状态码
@@ -248,14 +246,6 @@ module Fastlane
             env_name: "PGYER_BUILD_CHANNEL_SHORTCUT",
             description: "指定渠道的下载短链接",
             is_string: true,
-            optional: true
-          ),
-          FastlaneCore::ConfigItem.new(
-            key: :timeout,
-            env_name: "PGYER_TIMEOUT",
-            description: "上传超时时间（秒），默认为 1800 秒（30 分钟）",
-            is_string: false,
-            default_value: 1800,
             optional: true
           )
         ]
