@@ -74,14 +74,22 @@ module Fastlane
         # 输出调试信息（仅在 verbose 模式下）
         UI.verbose("🔧 执行命令: #{command.join(' ')}")
 
-        # 3. 执行命令（兼容 Fastlane 2.227.1）
+        # 3. 执行命令（兼容 Fastlane 2.227.1 的正确方式）
         UI.message("🚀 正在使用 curl 上传到蒲公英...")
 
-        begin
-          # ✅ 使用 Fastlane::Helper::Sh.sh 并设置 log: false 来禁用输出捕获
-          result = Fastlane::Helper::Sh.sh(command, error: false, log: false)
+        # 临时保存原始环境变量
+        original_output = ENV['FASTLANE_DISABLE_OUTPUT']
+        original_colors = ENV['FASTLANE_DISABLE_COLORS']
 
-          # 检查命令是否成功执行
+        begin
+          # 👇 关键：临时禁用 Fastlane 的输出捕获
+          ENV['FASTLANE_DISABLE_OUTPUT'] = '1'
+          ENV['FASTLANE_DISABLE_COLORS'] = '1'  # 可选：减少 ANSI 色彩干扰
+
+          # 执行命令（此时输出不会被 Ruby 缓冲，直接打印到终端）
+          result = sh(command)
+
+          # 检查退出码
           unless $?.success?
             UI.error("❌ curl 命令执行失败 (退出码: #{$?.exitstatus})")
             raise "curl 执行失败"
@@ -95,7 +103,6 @@ module Fastlane
           # 4. 解析 JSON 响应
           json = JSON.parse(body)
 
-          # 5. 判断是否上传成功
           if status_code == 200 && json["code"] == 0
             download_url = "https://www.pgyer.com/#{json['data']['buildShortcutUrl']}"
             qr_url = json['data']['buildQRCodeURL']
@@ -103,7 +110,7 @@ module Fastlane
             UI.success("🎉 上传成功！")
             UI.message("🔗 下载地址: #{download_url}")
             UI.message("📱 二维码: #{qr_url}")
-            # 返回结果，供后续 lane 使用
+
             return {
               success: true,
               download_url: download_url,
@@ -121,6 +128,10 @@ module Fastlane
         rescue => e
           UI.error("上传失败: #{e.message}")
           raise e
+        ensure
+          # 👇 恢复原始环境变量
+          ENV['FASTLANE_DISABLE_OUTPUT'] = original_output
+          ENV['FASTLANE_DISABLE_COLORS'] = original_colors
         end
       end
       # Shellwords.escape包裹多行字符串会导致字符串中出现大量 \ 转义符，
