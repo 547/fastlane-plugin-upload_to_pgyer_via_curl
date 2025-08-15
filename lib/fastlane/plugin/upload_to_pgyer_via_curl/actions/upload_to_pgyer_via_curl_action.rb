@@ -74,12 +74,18 @@ module Fastlane
         # 输出调试信息（仅在 verbose 模式下）
         UI.verbose("🔧 执行命令: #{command.join(' ')}")
 
-        # 3. 执行命令（关键：禁用输出捕获，提升性能）
+        # 3. 执行命令（兼容 Fastlane 2.227.1）
         UI.message("🚀 正在使用 curl 上传到蒲公英...")
 
         begin
-          # ✅ 核心优化：使用 Fastlane 的 sh，禁用输出捕获
-          result = sh(command, disable_output: true)
+          # ✅ 使用 Fastlane::Helper::Sh.sh 并设置 log: false 来禁用输出捕获
+          result = Fastlane::Helper::Sh.sh(command, error: false, log: false)
+
+          # 检查命令是否成功执行
+          unless $?.success?
+            UI.error("❌ curl 命令执行失败 (退出码: #{$?.exitstatus})")
+            raise "curl 执行失败"
+          end
 
           # 解析输出：最后一行是 HTTP 状态码
           lines = result.strip.split("\n")
@@ -97,7 +103,6 @@ module Fastlane
             UI.success("🎉 上传成功！")
             UI.message("🔗 下载地址: #{download_url}")
             UI.message("📱 二维码: #{qr_url}")
-
             # 返回结果，供后续 lane 使用
             return {
               success: true,
