@@ -11,17 +11,44 @@
 ---
 
 ## 📦 安装
+> ⚠️ 确保你的系统已安装 `curl`（绝大多数 macOS/Linux 系统默认自带）。
 
-在你的 Fastlane 项目中运行：
+### 确保 `Pluginfile` 正确（Bundle 管理）
+进入的你的工程根目录下找到fastlane/Pluginfile文件，没有就创建一个（注意：没有后缀，就是Pluginfile）
 
-```bash
-# gitee源
-fastlane add_plugin https://gitee.com/timersevenwang/fastlane-plugin-upload_to_pgyer_via_curl/releases/download/1.0.0/fastlane-plugin-upload_to_pgyer_via_curl-1.0.0.gem
-# github源
-fastlane add_plugin https://github.com/547/fastlane-plugin-upload_to_pgyer_via_curl/releases/download/1.0.0/fastlane-plugin-upload_to_pgyer_via_curl-1.0.0.gem
+如果你使用 `Pluginfile`（推荐），直接写：
+
+```ruby
+gem 'fastlane-plugin-upload_to_pgyer_via_curl', 
+    :git => 'https://gitee.com/timersevenwang/fastlane-plugin-upload_to_pgyer_via_curl.git',
+    :tag => '1.0.0'
+```
+或使用github的
+```ruby
+gem 'fastlane-plugin-upload_to_pgyer_via_curl', 
+    :git => 'https://github.com/547/fastlane-plugin-upload_to_pgyer_via_curl.git',
+    :tag => '1.0.0'
 ```
 
-> ⚠️ 确保你的系统已安装 `curl`（绝大多数 macOS/Linux 系统默认自带）。
+然后运行：
+
+```bash
+bundle install
+```
+
+Fastlane 会自动加载插件。
+
+---
+
+### 🛠️ 验证插件是否安装成功
+
+运行：
+
+```bash
+fastlane action upload_to_pgyer_via_curl
+```
+
+如果能显示插件的帮助信息，说明安装成功 ✅
 
 ---
 
